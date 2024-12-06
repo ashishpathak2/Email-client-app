@@ -1,40 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { EmailContext, FavoriteContext } from './contexts/Context';
-import axios from 'axios';
+import useEmails from './hooks/useEmails';
+import useLocalStorage from './hooks/useLocalStorage';
 import AllEmails from './components/AllEmails';
 
 const App = () => {
-  const [emails, setEmails] = useState([]);
-  const [filteredEmails, setFilteredEmails] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [favorites, setFavorites] = useState(JSON.parse(localStorage.getItem('UserFavoriteEmails')) || []);
-  const [reads, setReads] = useState(JSON.parse(localStorage.getItem('UserReadEmails')) || []);
-  const [page, setPage] = useState(1)
+  const [page, setPage] = useState(1);
+  // Use custom hooks
+  const { emails, filteredEmails, setFilteredEmails, loading, error } = useEmails(page);
+  const [favorites, setFavorites] = useLocalStorage('UserFavoriteEmails', []);
+  const [reads, setReads] = useLocalStorage('UserReadEmails', []);
 
-  useEffect(() => {
-    const loadEmails = async () => {
-      try {
-        const response = await axios.get(`https://flipkart-email-mock.now.sh/?page=${page}`);
-        const emailList = response.data.list;
-
-        if (emailList && emailList.length > 0){
-          setEmails(emailList);
-          setFilteredEmails(emailList);
-          setLoading(false);
-        }
-       
-      } catch (err) {
-
-        setError('Failed to load emails');
-        setLoading(false);
-      }
-    };
-    loadEmails();
-  }, [page]);
-  
-
-  // Mark email as favorite and update localStorage
+  // Mark email as favorite
   const markAsFavorite = (id) => {
     const updatedFavorites = new Set(favorites);
     let actionStatus = null;
@@ -49,23 +26,19 @@ const App = () => {
 
     const updatedArray = Array.from(updatedFavorites);
     setFavorites(updatedArray);
-    localStorage.setItem('UserFavoriteEmails', JSON.stringify(updatedArray));
     return actionStatus;
   };
 
+  // Mark email as read
   const markAsRead = (id) => {
     const updatedReads = new Set(reads);
     updatedReads.add(id);
 
     const updatedArray = Array.from(updatedReads);
     setReads(updatedArray);  // Update the state directly
-    localStorage.setItem('UserReadEmails', JSON.stringify(updatedArray));  // Sync with localStorage
+  };
 
-    // You can filter the emails right after marking as read to ensure the state is up to date
-    filterReads();  // Ensure the filteredEmails are updated
-};
-
-  // Filter favorites
+  // Filter favorite emails
   const filterFavorites = () => {
     const favoriteEmails = emails.filter((email) => favorites.includes(email.id));
     setFilteredEmails(favoriteEmails);
@@ -92,7 +65,7 @@ const App = () => {
           filterReads,
           filterUnReads,
           loading,
-          error, 
+          error,
           markAsRead,
           setReads,
           reads,
