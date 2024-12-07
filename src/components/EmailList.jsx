@@ -24,7 +24,7 @@ const EmailList= ({ emails, handleScreenSplit, isSplitView, activeEmailId , setI
             )}
             {emails.length > 0 && 
             <div className='flex items-center justify-center'>
-          <button className="border-2 px-4 sm:px-7 py-2 rounded-full cursor-pointer bg-[#e54065] hover:bg-[#d4385c] text-white" onClick={() => {setPage((prev) => (prev >= 2 ? 1 : prev + 1));setIsSplitView(false)}} >Load more emails : Go to page {page+1}</button>
+          <button className="border-2 px-4 sm:px-7 py-2 rounded-full cursor-pointer bg-[#e54065] hover:bg-[#d4385c] text-white" onClick={() => {setPage((prev) => (prev >= 2 ? 1 : prev + 1));setIsSplitView(false)}} >Load more emails</button>
         </div>}
         
         </ul>
